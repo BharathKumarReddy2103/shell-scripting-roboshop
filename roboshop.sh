@@ -10,11 +10,7 @@ DOMAIN_NAME="bharath2103.site"
 #for instance in ${INSTANCES[@]}
 for instance in $@
 do
-   if [ "$instance" == "frontend" ]; then
-       EXTRA="--associate-public-ip-address"
-   else
-       EXTRA=""
-   fi
+  EXTRA="--associate-public-ip-address"
 
     INSTANCE_ID=$(aws ec2 run-instances \
     --image-id $AMI_ID \
