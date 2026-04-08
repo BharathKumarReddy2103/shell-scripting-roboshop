@@ -49,30 +49,6 @@ VALIDATE $? "Starting MySQL"
 mysql_secure_installation --set-root-pass $MYSQL_ROOT_PASSWORD &>>$LOG_FILE
 VALIDATE $? "Setting MySQL root password"
 
-mysql <<EOF
--- Fix root local authentication
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';
-
--- Remove conflicting entries
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('%', 'localhost');
-
--- Create proper remote user
-CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
-
--- Grant permissions
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
-
-FLUSH PRIVILEGES;
-EOF
-
-VALIDATE $? "Fixing root authentication completely"
-
-sed -i 's/^bind-address.*/bind-address=0.0.0.0/' /etc/my.cnf
-VALIDATE $? "Configuring MySQL to listen on all IPs"
-
-systemctl restart mysqld
-VALIDATE $? "Restarting MySQL"
-
 END_TIME=$(date +%s)
 TOTAL_TIME=$(( $END_TIME - $START_TIME ))
 
