@@ -18,14 +18,30 @@ do
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name, Value=$instance}]" \
     --query "Instances[0].InstanceId" \
     --output text)
-    if [ $instance != "frontend" ]
+    if [ "$instance" != "frontend" ]
     then
-        IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].PrivateIpAddress" --output text)
+        IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID \
+        --query "Reservations[0].Instances[0].PrivateIpAddress" --output text)
+
         RECORD_NAME="$instance.$DOMAIN_NAME"
+
     else
-        IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
+        echo "Waiting for Public IP..."
+
+        while true; do
+            IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID \
+            --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
+
+           if [ "$IP" != "None" ]; then
+               break
+           fi
+
+           sleep 5
+        done
+
         RECORD_NAME="$DOMAIN_NAME"
     fi
+
     echo "$instance IP address: $IP"
 
     aws route53 change-resource-record-sets \
