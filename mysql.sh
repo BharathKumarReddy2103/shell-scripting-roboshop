@@ -49,12 +49,13 @@ VALIDATE $? "Starting MySQL"
 mysql_secure_installation --set-root-pass $MYSQL_ROOT_PASSWORD &>>$LOG_FILE
 VALIDATE $? "Setting MySQL root password"
 
-mysql -u root -p$MYSQL_ROOT_PASSWORD <<EOF
-ALTER USER 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
+mysql <<EOF
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';
+CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EOF
-VALIDATE $? "Allowing remote root access"
+VALIDATE $? "Fixing root authentication and allowing remote access"
 
 sed -i 's/^bind-address.*/bind-address=0.0.0.0/' /etc/my.cnf
 VALIDATE $? "Configuring MySQL to listen on all IPs"
