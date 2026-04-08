@@ -10,14 +10,27 @@ DOMAIN_NAME="bharath2103.site"
 #for instance in ${INSTANCES[@]}
 for instance in $@
 do
+   if [ "$instance" == "frontend" ]; then
+       EXTRA="--associate-public-ip-address"
+   else
+       EXTRA=""
+   fi
+
     INSTANCE_ID=$(aws ec2 run-instances \
     --image-id $AMI_ID \
     --instance-type t3.micro \
     --security-group-ids $SG_ID \
     --subnet-id $SUBNET_ID \
+    $EXTRA \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name, Value=$instance}]" \
     --query "Instances[0].InstanceId" \
     --output text)
+
+    echo "Created $instance → $INSTANCE_ID"
+
+   # WAIT until instance is running
+   aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+
     if [ "$instance" != "frontend" ]
     then
         IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID \
