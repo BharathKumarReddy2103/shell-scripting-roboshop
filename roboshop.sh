@@ -4,8 +4,8 @@ AMI_ID="ami-0220d79f3f480ecf5"
 SG_ID="sg-05847b88288dddafe" # replace with your SG ID
 SUBNET_ID="subnet-027e9b95abbffe496"
 INSTANCE=("mongodb" "redis" "mysql" "rabbitmq" "catalogue" "user" "cart" "shipping" "payment" "dispatch" "frontend")
-ZONE_ID="Z09266885JREMC64NO1J"
-DOMAIN_NAME="bharath2103.site"
+ZONE_ID="Z01312153HNV00B0UTMNI"
+DOMAIN_NAME="bharath2103.online"
 
 #for instance in ${INSTANCES[@]}
 for instance in $@
