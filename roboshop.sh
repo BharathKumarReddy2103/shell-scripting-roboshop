@@ -9,7 +9,8 @@ INSTANCES=("mongodb" "redis" "mysql" "rabbitmq" "catalogue" "user" "cart" "shipp
 ZONE_ID="Z01312153HNV00B0UTMNI"
 DOMAIN_NAME="bharath2103.online"
 
-for instance in "${INSTANCES[@]}"
+# for instance in "${INSTANCES[@]}"
+for instance in $@
 do
     echo "==========================================="
     echo "Creating EC2 instance: $instance"
