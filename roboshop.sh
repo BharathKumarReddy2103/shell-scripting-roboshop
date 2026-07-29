@@ -4,10 +4,33 @@ AMI_ID="ami-0220d79f3f480ecf5"
 SG_ID="sg-05847b88288dddafe"
 SUBNET_ID="subnet-027e9b95abbffe496"
 
-INSTANCES=("mongodb" "redis" "mysql" "rabbitmq" "catalogue" "user" "cart" "shipping" "payment" "dispatch" "frontend")
+DEFAULT_INSTANCES=("mongodb" "redis" "mysql" "rabbitmq" "catalogue" "user" "cart" "shipping" "payment" "dispatch" "frontend")
 
 ZONE_ID="Z01312153HNV00B0UTMNI"
 DOMAIN_NAME="bharath2103.online"
+
+# If user provides instance names, create only those.
+# Otherwise create all instances.
+if [ $# -gt 0 ]; then
+    INSTANCES=("$@")
+else
+    INSTANCES=("${DEFAULT_INSTANCES[@]}")
+fi
+
+# Validate instance names
+VALID_INSTANCES=("mongodb" "redis" "mysql" "rabbitmq" "catalogue" "user" "cart" "shipping" "payment" "dispatch" "frontend")
+
+for instance in "${INSTANCES[@]}"
+do
+    if [[ ! " ${VALID_INSTANCES[@]} " =~ " ${instance} " ]]; then
+        echo
+        echo "❌ Invalid instance name: $instance"
+        echo
+        echo "Valid instance names are:"
+        printf '%s\n' "${VALID_INSTANCES[@]}"
+        exit 1
+    fi
+done
 
 for instance in "${INSTANCES[@]}"
 do
@@ -24,7 +47,7 @@ do
         --output text)
 
     if [ $? -ne 0 ] || [ -z "$INSTANCE_ID" ]; then
-        echo "Failed to create instance: $instance"
+        echo "❌ Failed to create instance: $instance"
         continue
     fi
 
@@ -58,7 +81,7 @@ do
     fi
 
     if [ -z "$DNS_IP" ] || [ "$DNS_IP" = "None" ]; then
-        echo "IP Address not available for $instance"
+        echo "❌ IP Address not available for $instance"
         continue
     fi
 
@@ -84,13 +107,13 @@ do
         }"
 
     if [ $? -eq 0 ]; then
-        echo "Route53 updated successfully."
+        echo "✅ Route53 updated successfully."
     else
-        echo "Route53 update failed."
+        echo "❌ Route53 update failed."
     fi
 
     echo "==========================================="
     echo
 done
 
-echo "All instances processed successfully."
+echo "🎉 Requested instance(s) processed successfully."
